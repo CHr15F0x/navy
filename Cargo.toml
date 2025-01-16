@@ -1,0 +1,14 @@
+[package]
+name = "navy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "navy_lib"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1.0.75"
+tracing = "0.1.26"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tokio = { version = "1.43.0", features = ["full"] }
