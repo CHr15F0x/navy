@@ -9,6 +9,17 @@ path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1.0.75"
+base64 = "0.22.1"
+libp2p = { version = "0.55.0", features = [
+    "identify",
+    "kad",
+    "macros",
+    "ping",
+    "quic",
+    "request-response",
+    "serde",
+    "tokio",
+] }
 tracing = "0.1.26"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tokio = { version = "1.43.0", features = ["full"] }

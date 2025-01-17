@@ -1,33 +1,13 @@
 use crate::state::{Board, Cell};
-use std::fs::read_to_string;
 use std::io::Read;
 
 use anyhow::Context;
 
-const BOOT_NODES_FILE: &str = "boot.nodes";
-// Tbh 1 boot node should be fine
 const MY_BOARD_FILE: &str = "my.board";
 // At most 2 newline marker bytes, so we're "future proof"
 const UPPER_BOARD_FILE_LIMIT: usize = (Board::SIZE + 2) * Board::SIZE + 2;
 // No newline at the eof
 const LOWER_BOARD_FILE_LIMIT: usize = (Board::SIZE + 1) * Board::SIZE;
-
-pub fn read_boot_nodes() -> anyhow::Result<Vec<String>> {
-    // TODO this should be limited in the number of bytes ingested and in the number of boot node addresses produced
-    let boot_nodes = read_to_string(BOOT_NODES_FILE)
-        .context("Reading boot nodes file")?
-        .lines()
-        .map(String::from)
-        .collect::<Vec<_>>();
-
-    anyhow::ensure!(
-        !boot_nodes.is_empty(),
-        "At least one bootstrap node is required in {}",
-        BOOT_NODES_FILE
-    );
-
-    Ok(boot_nodes)
-}
 
 pub fn read_my_board() -> anyhow::Result<Board> {
     let mut board = Board::default();
