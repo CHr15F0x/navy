@@ -1,4 +1,4 @@
-use crate::state::{Board, Cell};
+use crate::state::{Board, Field};
 use std::fmt;
 
 pub fn draw(my_board: &Board, enemy_board: &Board) {
@@ -11,10 +11,10 @@ impl fmt::Display for Board {
         for y in 0..Board::SIZE {
             for x in 0..Board::SIZE {
                 match self.get(x, y) {
-                    Cell::Empty => write!(f, ".")?,
-                    Cell::Ship => write!(f, "+")?,
-                    Cell::Hit => write!(f, "x")?,
-                    Cell::Miss => write!(f, "o")?,
+                    Field::Empty => write!(f, ".")?,
+                    Field::Ship => write!(f, "+")?,
+                    Field::Hit => write!(f, "x")?,
+                    Field::Miss => write!(f, "o")?,
                 }
             }
             writeln!(f)?;
@@ -31,9 +31,9 @@ impl fmt::Display for EnemyBoard<'_> {
         for y in 0..Board::SIZE {
             for x in 0..Board::SIZE {
                 match self.0.get(x, y) {
-                    Cell::Empty | Cell::Ship => write!(f, ".")?,
-                    Cell::Hit => write!(f, "x")?,
-                    Cell::Miss => write!(f, "o")?,
+                    Field::Empty | Field::Ship => write!(f, ".")?,
+                    Field::Hit => write!(f, "x")?,
+                    Field::Miss => write!(f, "o")?,
                 }
             }
             writeln!(f)?;

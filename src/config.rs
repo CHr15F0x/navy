@@ -1,4 +1,4 @@
-use crate::state::{Board, Cell};
+use crate::state::{Board, Field};
 use std::io::Read;
 
 use anyhow::Context;
@@ -47,7 +47,7 @@ pub fn read_my_board() -> anyhow::Result<Board> {
         }
 
         for (x, c) in line.chars().enumerate() {
-            board.set(x, y, Cell::try_from(c)?);
+            board.set(x, y, Field::try_from(c)?);
         }
     }
 
@@ -60,13 +60,13 @@ pub fn read_my_board() -> anyhow::Result<Board> {
     Ok(board)
 }
 
-impl TryFrom<char> for Cell {
+impl TryFrom<char> for Field {
     type Error = anyhow::Error;
 
     fn try_from(c: char) -> Result<Self, Self::Error> {
         match c {
-            '.' => Ok(Cell::Empty),
-            '+' => Ok(Cell::Ship),
+            '.' => Ok(Field::Empty),
+            '+' => Ok(Field::Ship),
             _ => Err(anyhow::anyhow!(
                 "Invalid character: {}, only empty '.' or ship '+' are allowed",
                 c

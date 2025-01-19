@@ -5,7 +5,7 @@ use libp2p::PeerId;
 use navy_lib::config;
 use navy_lib::p2p;
 use navy_lib::state::Board;
-use navy_lib::state::Cell;
+use navy_lib::state::Field;
 use navy_lib::ui;
 
 #[tokio::main]
@@ -100,7 +100,7 @@ async fn choose_peer(p2p_client: p2p::Client, _my_board: Board) -> Board {
         };
 
         // TODO send a game request to the peer
-        break Board([Cell::Ship, Cell::Empty, Cell::Empty, Cell::Empty]);
+        break Board([Field::Ship, Field::Empty, Field::Empty, Field::Empty]);
     }
 }
 
