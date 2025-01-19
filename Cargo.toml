@@ -8,7 +8,7 @@ name = "navy_lib"
 path = "src/lib.rs"
 
 [dependencies]
-anyhow = "1.0.75"
+anyhow = "1.0.95"
 base64 = "0.22.1"
 libp2p = { version = "0.55.0", features = [
     "identify",
@@ -16,10 +16,14 @@ libp2p = { version = "0.55.0", features = [
     "macros",
     "ping",
     "quic",
-    "request-response",
+    "json",
     "serde",
     "tokio",
 ] }
-tracing = "0.1.26"
+serde = { version = "1.0.217", features = ["derive"] }
+tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tokio = { version = "1.43.0", features = ["full"] }
+
+[dev-dependencies]
+serde_json = { version = "1.0.136" }

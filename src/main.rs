@@ -1,9 +1,11 @@
 use std::time::Duration;
 
-use anyhow::{anyhow, Context};
+use anyhow::Context;
+use libp2p::PeerId;
 use navy_lib::config;
 use navy_lib::p2p;
-use navy_lib::state::{Board, Cell};
+use navy_lib::state::Board;
+use navy_lib::state::Cell;
 use navy_lib::ui;
 
 #[tokio::main]
@@ -17,13 +19,13 @@ async fn main() -> anyhow::Result<()> {
     let i_am_boot = std::env::args().nth(1) == Some("-b".to_string());
 
     let mut my_board = config::read_my_board().context("Reading my board")?;
-    let mut enemy_board = Board([Cell::Empty, Cell::Empty, Cell::Empty, Cell::Ship]);
+    let mut enemy_board = Board::default();
 
     let (_p2p_loop_handle, p2p_client) = p2p::start(i_am_boot)?;
 
-    let game_loop_jh = std::thread::spawn(move || {
+    let game_loop_jh = tokio::spawn(async move {
         'outer: loop {
-            let _peer_idx = choose_peer(&p2p_client);
+            enemy_board = choose_peer(p2p_client.clone(), my_board).await;
 
             // Play with peer
             // TODO decide who starts
@@ -33,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
             loop {
                 println!("Your turn!");
                 loop {
-                    let (x, y) = ui::shoot();
+                    let (x, y) = ui::shoot().await;
                     match enemy_board.shoot(x, y) {
                         Some(_is_hit) => break,
                         None => {
@@ -55,7 +57,7 @@ async fn main() -> anyhow::Result<()> {
                 // TODO this should come from p2p
                 println!("Enemy's turn!");
                 loop {
-                    let (x, y) = ui::shoot();
+                    let (x, y) = ui::shoot().await;
                     match my_board.shoot(x, y) {
                         Some(_is_hit) => break,
                         None => {
@@ -77,33 +79,39 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
-    game_loop_jh
-        .join()
-        .map_err(|_| anyhow!("Game loop thread panicked"))?;
+    tokio::select! {
+        _ = game_loop_jh => {}
+        _ = _p2p_loop_handle => {}
+    }
 
     Ok(())
 }
 
 /// Get the index of the peer to play with.
-fn choose_peer(p2p_client: &p2p::Client) -> usize {
+async fn choose_peer(p2p_client: p2p::Client, _my_board: Board) -> Board {
     loop {
-        let peers = wait_for_peers(p2p_client);
-        ui::list_peers(&peers);
-        let peer_idx = ui::choose_peer(peers.len());
-        if let Some(peer_idx) = peer_idx {
-            break peer_idx;
-        }
+        let _peer = loop {
+            let peers = wait_for_peers(p2p_client.clone()).await;
+            ui::list_peers(&peers);
+            let peer_idx = ui::choose_peer(peers.len()).await;
+            if let Some(peer_idx) = peer_idx {
+                break peers[peer_idx];
+            }
+        };
+
+        // TODO send a game request to the peer
+        break Board([Cell::Ship, Cell::Empty, Cell::Empty, Cell::Empty]);
     }
 }
 
 /// Wait for a random set of peers in the network to be discovered.
-fn wait_for_peers(p2p_client: &p2p::Client) -> Vec<String> {
+async fn wait_for_peers(p2p_client: p2p::Client) -> Vec<PeerId> {
     loop {
-        let peers = p2p_client.get_peers();
+        let peers = p2p_client.get_peers().await;
         if !peers.is_empty() {
             break peers;
         }
         // Wait and retry
-        std::thread::sleep(Duration::from_secs(1));
+        tokio::time::sleep(Duration::from_secs(1)).await;
     }
 }

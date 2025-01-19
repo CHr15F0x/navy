@@ -23,7 +23,7 @@ static BOOT_KEYPAIR: LazyLock<Keypair> = LazyLock::new(|| {
         .expect("Valid private key");
     Keypair::from_protobuf_encoding(&buf).expect("Valid keypair")
 });
-static BOOT_PEER_ID: LazyLock<PeerId> = LazyLock::new(|| BOOT_KEYPAIR.public().to_peer_id());
+pub static BOOT_PEER_ID: LazyLock<PeerId> = LazyLock::new(|| BOOT_KEYPAIR.public().to_peer_id());
 
 const TEN_MINUTES: u32 = 10 * 60 * 1000;
 
@@ -65,7 +65,7 @@ pub fn start(i_am_boot: bool) -> anyhow::Result<(tokio::task::JoinHandle<()>, Cl
                     handle_command(&mut swarm, &mut pending_queries, command.expect("Command sender not to be dropped"));
                 }
                 event = swarm.select_next_some() => {
-                    handle_event(&mut swarm, &mut pending_queries, event);
+                    handle_event(&mut swarm, &mut pending_queries, event).await;
                 }
             }
         }
@@ -101,7 +101,7 @@ fn handle_command(
     }
 }
 
-fn handle_event(
+async fn handle_event(
     swarm: &mut Swarm<Behaviour>,
     pending_queries: &mut HashMap<QueryId, GetPeersReplyTx>,
     event: SwarmEvent<BehaviourEvent>,

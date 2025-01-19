@@ -1,9 +1,4 @@
-//! Game state, which comprises both boards: the player's board and the enemy's board.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub struct State {
-    pub my_board: Board,
-    pub enemy_board: Board,
-}
+//! Game state
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct Board(pub [Cell; Board::SIZE * Board::SIZE]);
